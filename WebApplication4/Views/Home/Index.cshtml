@@ -1,0 +1,114 @@
+﻿
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="@Url.Content("~/Content/jquery.mobile-1.4.5.min.css")" rel="stylesheet" type="text/css" />
+    @
+    <script src="@Url.Content("~/Scripts/jquery-1.8.0.min.js")"></script>
+    <script src=""@Url.Content("~/Scripts/jquery.mobile-1.4.5.min.js")"></script>
+    <title>EstouNoRaulHC!</title>
+</head>
+<body>
+
+    <div data-role="page" id="inicial">
+        <div data-role="header">
+            <h1>RaulHC != empty</h1>
+        </div>
+
+        <div data-role="main" class="ui-content">
+            <input value="Sim!!!" data-icon="heart" data-theme="a" style="background-color:green"  type="button" />
+        </div>
+
+        <div data-role="footer">
+            <div data-role="navbar" data-iconpos="bottom">
+                <ul>
+                    <li><a href="#" data-icon="home" class="ui-btn-active">Inicial</a></li>
+                    <li><a href="#checkin" data-icon="location">Check-in</a></li>
+                    <li><a href="#presentes" data-icon="eye">Presentes</a></li>
+                </ul>
+            </div><!-- /navbar -->
+        </div>
+    </div>
+
+    <div data-role="page" id="checkin">
+        <div data-role="header">
+            <h1>Está no RaulHC?</h1>
+        </div>
+
+        <div data-role="main" class="ui-content">
+            <label for="text-basic">Meu nome/nick é:</label>
+            <input name="text-basic" id="text-basic" value="" type="text">
+            <input value="Check-in" data-icon="plus" data-theme="a" type="button">
+        </div>
+
+        <div data-role="footer">
+            <div data-role="navbar" data-iconpos="bottom">
+                <ul>
+                    <li><a href="#inicial" data-icon="home">Inicial</a></li>
+                    <li><a href="#" data-icon="location" class="ui-btn-active">Check-in</a></li>
+                    <li><a href="#presentes" data-icon="eye">Presentes</a></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <div data-role="page" id="presentes">
+        <div data-role="header">
+            <h1>Presentes</h1>
+        </div>
+
+        <ul data-role="listview" data-inset="true">
+            @for (int i = 0; i < 5; i++)
+            {
+                <li data-icon="delete"><a href="#">Pessoa @i</a></li>
+            }
+            
+        </ul>
+
+        <div data-role="footer">
+            <h1>EstouNoRaulHC!</h1>
+        </div>
+        <div data-role="footer">
+            <div data-role="navbar" data-iconpos="bottom">
+                <ul>
+                    <li><a href="#inicial" data-icon="home">Inicial</a></li>
+                    <li><a href="#checkin" data-icon="location">Check-in</a></li>
+                    <li><a href="#" data-icon="eye" class="ui-btn-active">Presentes</a></li>
+                </ul>
+            </div><!-- /navbar -->
+        </div>
+    </div>
+
+    <script>
+        $(document).ready(function(){
+
+            $("input[value='Check-in']").on("tap", function () {
+                $.mobile.changePage("#presentes");
+            });
+
+            $("#inicial").on("swipeleft", function () {
+                $.mobile.changePage("#checkin");
+            });
+
+            $("#checkin").on("swipeleft", function () {
+                $.mobile.changePage("#presentes");
+            });
+
+            $("#checkin").on("swiperight", function () {
+                $.mobile.changePage("#inicial");
+            });
+
+            $("#presentes").on("swiperight", function () {
+                $.mobile.changePage("#checkin");
+            });
+
+        });
+    </script>
+
+</body>
+</html>
