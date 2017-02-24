@@ -8,9 +8,10 @@
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link href="@Url.Content("~/Content/jquery.mobile-1.4.5.min.css")" rel="stylesheet" type="text/css" />
-    @
     <script src="@Url.Content("~/Scripts/jquery-1.8.0.min.js")"></script>
-    <script src=""@Url.Content("~/Scripts/jquery.mobile-1.4.5.min.js")"></script>
+    <script src="@Url.Content("~/Scripts/jquery.mobile-1.4.5.min.js")"></script>
+    <script src="@Url.Content("~/Scripts/jquery.signalR-2.1.2.js")"></script>
+    <script src="@Url.Content("~/signalr/hubs")"></script>
     <title>EstouNoRaulHC!</title>
 </head>
 <body>
@@ -31,7 +32,7 @@
                     <li><a href="#checkin" data-icon="location">Check-in</a></li>
                     <li><a href="#presentes" data-icon="eye">Presentes</a></li>
                 </ul>
-            </div><!-- /navbar -->
+            </div>
         </div>
     </div>
 
@@ -42,8 +43,8 @@
 
         <div data-role="main" class="ui-content">
             <label for="text-basic">Meu nome/nick é:</label>
-            <input name="text-basic" id="text-basic" value="" type="text">
-            <input value="Check-in" data-icon="plus" data-theme="a" type="button">
+            <input name="text-basic" id="nome-nick" value="" type="text" />
+            <input value="Check-in" data-icon="plus" data-theme="a" type="button" />
         </div>
 
         <div data-role="footer">
@@ -62,13 +63,7 @@
             <h1>Presentes</h1>
         </div>
 
-        <ul data-role="listview" data-inset="true">
-            @for (int i = 0; i < 5; i++)
-            {
-                <li data-icon="delete"><a href="#">Pessoa @i</a></li>
-            }
-            
-        </ul>
+        <ul data-role="listview"></ul>
 
         <div data-role="footer">
             <h1>EstouNoRaulHC!</h1>
@@ -80,16 +75,12 @@
                     <li><a href="#checkin" data-icon="location">Check-in</a></li>
                     <li><a href="#" data-icon="eye" class="ui-btn-active">Presentes</a></li>
                 </ul>
-            </div><!-- /navbar -->
+            </div>
         </div>
     </div>
 
     <script>
         $(document).ready(function(){
-
-            $("input[value='Check-in']").on("tap", function () {
-                $.mobile.changePage("#presentes");
-            });
 
             $("#inicial").on("swipeleft", function () {
                 $.mobile.changePage("#checkin");
@@ -107,7 +98,104 @@
                 $.mobile.changePage("#checkin");
             });
 
+            var pessoasIO = $.connection.pessoasIO;
+
+            pessoasIO.client.listarPessoas = function (pessoas) {
+
+                preencherLista(pessoas);
+
+            };
+
+            $.connection.hub.start().done(function () {
+
+                $("input[value='Check-in']").on("tap", function () {
+
+                    var nick = $("#nome-nick").val();
+                    
+                    if (nick != null && nick != "") {
+
+                        pessoasIO.server.checkIn(nick, getDateTime());
+
+                        guardarNick(nick);
+
+                        $.mobile.changePage("#presentes");
+
+                        $("#nome-nick").val(null);
+                    }
+
+                });
+
+                $("ul[data-role='listview']").on("tap", "li[data-icon='delete']", function () {
+
+                    $(this).detach();
+
+                    $('ul[data-role="listview"]').listview('refresh');
+
+                    pessoasIO.server.checkOut(localStorage.getItem("nick"));
+
+                    localStorage.removeItem("nick");
+
+                });
+
+                pessoasIO.server.obterPessoasNoRaul();
+
+            });
+
         });
+
+        function preencherLista(pessoas) {
+
+            var pessoasJSON = JSON.parse(pessoas);
+
+            var listaDePresentes = $('ul[data-role="listview"]');
+            listaDePresentes.empty();
+
+            var nick = localStorage.getItem("nick");
+            var item = "";
+
+            for (var i = 0; i < pessoasJSON.length; i++) {
+
+                if (nick != pessoasJSON[i].Nome)
+                    {
+                    item = '<li><strong>' + pessoasJSON[i].Nome
+                    + '</strong> | Chegou as: ' + pessoasJSON[i].QuandoChegou + '</li>';
+                }
+                else {
+                    item = '<li data-icon="delete"><a href="#"><strong>' + pessoasJSON[i].Nome
+                    + '</strong> | Chegou as: ' + pessoasJSON[i].QuandoChegou + '</a></li>';
+                }
+
+                listaDePresentes.append(item);
+
+            }
+
+            listaDePresentes.listview('refresh');
+
+        }
+
+        function guardarNick(nick) {
+
+            if (typeof (Storage) !== "undefined") {
+
+                localStorage.setItem("nick", nick);
+
+            } else {
+
+                alert("Seu navegador não dá suporte a Local Storage");
+
+            }
+        }
+
+        function getDateTime(){
+            var d = new Date();
+            var n = d.getDate();
+            n += "/" + (d.getMonth() + 1);
+            n += "/" + d.getFullYear();
+            n += " " + d.getHours();
+            n += ":" + d.getMinutes();
+    
+            return n;
+        }
     </script>
 
 </body>
